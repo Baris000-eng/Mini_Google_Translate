@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Google Translate</title>
     <link rel="stylesheet" href="../static/mini_google_translate_style.css">
 </head>
+
 <body>
 
     <div class="container">
         <h2>Mini Google Translate</h2>
-        
+
         <form action="/translate" method="post">
             <div class="form-container">
                 <!-- Left text area for the original text -->
                 <textarea name="text" placeholder="Enter text to translate" required>{{ text or '' }}</textarea>
 
                 <!-- Right text area for the translated text -->
-                <textarea name="translated_text" placeholder="Translated text will appear here" readonly>{{ translated_text or '' }}</textarea>
+                <textarea name="translated_text" placeholder="Translated text will appear here"
+                    readonly>{{ translated_text or '' }}</textarea>
             </div>
 
             <!-- Language selector and button -->
             <select name="target_language" required>
-                <option value="tr" {% if target_language == 'tr' %}selected{% endif %}>Turkish</option>
-                <option value="en" {% if target_language == 'en' %}selected{% endif %}>English</option>
-                <option value="es" {% if target_language == 'es' %}selected{% endif %}>Spanish</option>
-                <option value="fr" {% if target_language == 'fr' %}selected{% endif %}>French</option>
-                <option value="de" {% if target_language == 'de' %}selected{% endif %}>German</option>
-                <option value="it" {% if target_language == 'it' %}selected{% endif %}>Italian</option>
-                <option value="ja" {% if target_language == 'ja' %}selected{% endif %}>Japanese</option>
-                <option value="ko" {% if target_language == 'ko' %}selected{% endif %}>Korean</option>
-                <option value="ar" {% if target_language == 'ar' %}selected{% endif %}>Arabic</option>
+                {% for code, language in langs.items() %}
+                <option value="{{ code }}" {% if target_language==code %}selected{% endif %}>
+                    {{ language }}
+                </option>
+                {% endfor %}
+
             </select>
 
             <button type="submit">Translate</button>
@@ -38,4 +38,5 @@
     </div>
 
 </body>
+
 </html>
