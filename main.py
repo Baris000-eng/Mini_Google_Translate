@@ -3,7 +3,6 @@ from googletrans import Translator
 
 app = Flask(__name__)
 
-# Initialize the translator object
 translator = Translator()
 
 @app.route('/')
@@ -16,14 +15,13 @@ def translate():
     text = request.form.get('text')
     target_language = request.form.get('target_language')
 
-    # Perform the translation
+    # Translation
     if text:
         translation = translator.translate(text, dest=target_language)
         translated_text = translation.text
     else:
         translated_text = None
 
-    # Render the result page with translated text
     return render_template('index.html', translated_text=translated_text, text=text, target_language=target_language)
 
 if __name__ == '__main__':
