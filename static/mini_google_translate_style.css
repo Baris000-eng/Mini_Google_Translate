@@ -13,7 +13,7 @@ body {
     width: 100%;
     max-width: 800px;
     padding: 30px;
-    background-color: white;
+    background-color: lightblue;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -35,11 +35,13 @@ h2 {
 
 .form-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    gap: 15px;
 }
 
 .textarea-container {
     position: relative;
+    width: 50%;
     margin-bottom: 20px;
 }
 
@@ -62,7 +64,7 @@ textarea {
 
 .arrows {
     text-align: center;
-    margin: 10px 0;
+    margin: 10px 10px;
 }
 
 .arrows i {

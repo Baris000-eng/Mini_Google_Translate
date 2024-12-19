@@ -17,7 +17,7 @@
 
         <form action="/translate" method="post">
             <div class="language-container">
-                <select name="source_language" required>
+                <select name="source_language" id="source_language" required>
                     {% for code, language in langs.items() %}
                     <option value="{{ code }}" {% if source_language == code %}selected{% endif %}>
                         {{ language }}
@@ -25,7 +25,7 @@
                     {% endfor %}
                 </select>
 
-                <select name="target_language" required>
+                <select name="target_language" id="target_language" required>
                     {% for code, language in langs.items() %}
                     <option value="{{ code }}" {% if target_language == code %}selected{% endif %}>
                         {{ language }}
@@ -41,13 +41,13 @@
                 </div>
 
                 <div class="arrows">
-                    <i class="fas fa-arrow-left"></i>
-                    <i class="fas fa-arrow-right"></i>
+                    <i id="swap-languages" class="fas fa-arrow-left"></i>
+                    <i id="swap-languages" class="fas fa-arrow-right"></i>
                 </div>
 
                 <div class="textarea-container">
                     <textarea name="translated_text" class="translated-text" placeholder="Translated text will appear here" readonly>{{ translated_text or '' }}</textarea>
-                    <i id="stt-translate-btn" class="fas fa-microphone stt-icon"></i>
+                    <i id="tts-translate-btn" class="fas fa-microphone tts-icon"></i>
                 </div>
             </div>
 
@@ -64,6 +64,18 @@
     </div>
 
     <script>
+        // Swap source and target language
+        $('#swap-languages').click(function () {
+            // Get the selected language codes
+            var sourceLang = $('#source_language').val();
+            var targetLang = $('#target_language').val();
+
+            // Swap the values
+            $('#source_language').val(targetLang);
+            $('#target_language').val(sourceLang);
+        });
+
+        // Other existing functionality
         $('#stt-btn').click(function () {
             $.ajax({
                 url: '/stt',

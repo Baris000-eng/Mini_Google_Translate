@@ -28,8 +28,7 @@ def translate():
     else:
         translated_text = "Please provide some text to translate."
 
-    return render_template('index.html', translated_text=translated_text, text=text, target_language=target_language, langs=languages)
-
+    return jsonify({'translated_text': translated_text})
 
 @app.route('/stt', methods=['POST'])
 def stt():
@@ -44,7 +43,6 @@ def stt():
         return jsonify({'text': text})
     except Exception as e:
         return jsonify({'error': str(e)})
-
 
 @app.route('/tts', methods=['POST'])
 def tts():
