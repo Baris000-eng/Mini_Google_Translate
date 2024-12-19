@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request
-from googletrans import Translator 
+from flask import Flask, render_template, request, jsonify
+from googletrans import Translator
 from google_translate_constants import languages
+import speech_recognition as sr
+from gtts import gTTS
+import os
+import tempfile
 
 app = Flask(__name__)
-
 translator = Translator()
 
 @app.route('/')
@@ -12,7 +15,6 @@ def home():
 
 @app.route('/translate', methods=['POST'])
 def translate():
-    # Get the text and target language choice from the form
     text = request.form.get('text')
     target_language = request.form.get('target_language')
 
@@ -26,8 +28,34 @@ def translate():
     else:
         translated_text = "Please provide some text to translate."
 
-     
     return render_template('index.html', translated_text=translated_text, text=text, target_language=target_language, langs=languages)
+
+
+@app.route('/stt', methods=['POST'])
+def stt():
+    recognizer = sr.Recognizer()
+    try:
+        with sr.Microphone() as source:
+            recognizer.adjust_for_ambient_noise(source)
+            print("Say something...")
+            audio = recognizer.listen(source)
+
+        text = recognizer.recognize_google(audio)
+        return jsonify({'text': text})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
+@app.route('/tts', methods=['POST'])
+def tts():
+    text = request.form.get('text')
+    if text:
+        tts = gTTS(text, lang='en')
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        tts.save(temp_file.name)
+        return jsonify({'audio_url': temp_file.name})
+    else:
+        return jsonify({'error': 'No text provided for TTS.'})
 
 if __name__ == '__main__':
     app.run(debug=True)

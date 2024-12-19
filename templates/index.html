@@ -5,38 +5,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Google Translate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <link rel="stylesheet" href="../static/mini_google_translate_style.css">
 </head>
 
 <body>
-
     <div class="container">
         <h2>Mini Google Translate</h2>
 
         <form action="/translate" method="post">
-            <div class="form-container">
-                <!-- Left text area for the original text -->
-                <textarea name="text" placeholder="Enter text to translate" required>{{ text or '' }}</textarea>
+            <div class="language-container">
+                <select name="source_language" required>
+                    {% for code, language in langs.items() %}
+                    <option value="{{ code }}" {% if source_language == code %}selected{% endif %}>
+                        {{ language }}
+                    </option>
+                    {% endfor %}
+                </select>
 
-                <!-- Right text area for the translated text -->
-                <textarea name="translated_text" placeholder="Translated text will appear here"
-                    readonly>{{ translated_text or '' }}</textarea>
+                <select name="target_language" required>
+                    {% for code, language in langs.items() %}
+                    <option value="{{ code }}" {% if target_language == code %}selected{% endif %}>
+                        {{ language }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
 
-            <!-- Language selector and button -->
-            <select name="target_language" required>
-                {% for code, language in langs.items() %}
-                <option value="{{ code }}" {% if target_language==code %}selected{% endif %}>
-                    {{ language }}
-                </option>
-                {% endfor %}
+            <div class="form-container">
+                <div class="textarea-container">
+                    <textarea id="stt-text" name="text" placeholder="Enter text to translate" required>{{ text or '' }}</textarea>
+                    <i id="stt-btn" class="fas fa-microphone stt-icon"></i>
+                </div>
 
-            </select>
+                <div class="arrows">
+                    <i class="fas fa-arrow-left"></i>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
 
-            <button type="submit">Translate</button>
+                <div class="textarea-container">
+                    <textarea name="translated_text" class="translated-text" placeholder="Translated text will appear here" readonly>{{ translated_text or '' }}</textarea>
+                    <i id="stt-translate-btn" class="fas fa-microphone stt-icon"></i>
+                </div>
+            </div>
+
+            <div class="language-container">
+                <button type="submit" class="translate-btn">Translate</button>
+            </div>
         </form>
+
+        <button id="tts-btn" class="tts-btn">Convert Text to Speech</button>
+
+        <audio id="tts-audio" controls style="display:none;">
+            <source id="audio-source" type="audio/mp3">
+        </audio>
     </div>
 
+    <script>
+        $('#stt-btn').click(function () {
+            $.ajax({
+                url: '/stt',
+                type: 'POST',
+                success: function (response) {
+                    if (response.text) {
+                        $('#stt-text').val(response.text);
+                    } else {
+                        alert('Error: ' + response.error);
+                    }
+                }
+            });
+        });
+
+        $('#stt-translate-btn').click(function () {
+            $.ajax({
+                url: '/stt',
+                type: 'POST',
+                success: function (response) {
+                    if (response.text) {
+                        $('textarea[name="translated_text"]').val(response.text);
+                    } else {
+                        alert('Error: ' + response.error);
+                    }
+                }
+            });
+        });
+
+        $('#tts-btn').click(function () {
+            var text = $('textarea[name="translated_text"]').val();
+            if (text) {
+                $.ajax({
+                    url: '/tts',
+                    type: 'POST',
+                    data: { text: text },
+                    success: function (response) {
+                        if (response.audio_url) {
+                            $('#audio-source').attr('src', response.audio_url);
+                            $('#tts-audio')[0].load();
+                            $('#tts-audio')[0].play();
+                        } else {
+                            alert('Error: ' + response.error);
+                        }
+                    }
+                });
+            } else {
+                alert('Please enter text for TTS.');
+            }
+        });
+    </script>
 </body>
 
 </html>
