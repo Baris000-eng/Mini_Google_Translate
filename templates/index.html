@@ -1,131 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Google Translate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="static/mini_google_translate_style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
-    <link rel="stylesheet" href="../static/mini_google_translate_style.css">
 </head>
-
 <body>
     <div class="container">
         <h2>Mini Google Translate</h2>
-
-        <form action="/translate" method="post">
-            <div class="language-container">
-                <select name="source_language" id="source_language" required>
-                    {% for code, language in langs.items() %}
-                    <option value="{{ code }}" {% if source_language == code %}selected{% endif %}>
-                        {{ language }}
-                    </option>
-                    {% endfor %}
-                </select>
-
-                <select name="target_language" id="target_language" required>
-                    {% for code, language in langs.items() %}
-                    <option value="{{ code }}" {% if target_language == code %}selected{% endif %}>
-                        {{ language }}
-                    </option>
-                    {% endfor %}
-                </select>
+        
+        <!-- Language Selection -->
+        <div class="language-container">
+            <select id="source-language">
+                {% for code, name in langs.items() %}
+                <option value="{{ code }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <div class="arrows">
+                <i class="fas fa-arrow-right"></i>
             </div>
-
-            <div class="form-container">
-                <div class="textarea-container">
-                    <textarea id="stt-text" name="text" placeholder="Enter text to translate" required>{{ text or '' }}</textarea>
-                    <i id="stt-btn" class="fas fa-microphone stt-icon"></i>
-                </div>
-
-                <div class="arrows">
-                    <i id="swap-languages" class="fas fa-arrow-left"></i>
-                    <i id="swap-languages" class="fas fa-arrow-right"></i>
-                </div>
-
-                <div class="textarea-container">
-                    <textarea name="translated_text" class="translated-text" placeholder="Translated text will appear here" readonly>{{ translated_text or '' }}</textarea>
-                    <i id="tts-translate-btn" class="fas fa-microphone tts-icon"></i>
-                </div>
+            <select id="target-language">
+                {% for code, name in langs.items() %}
+                <option value="{{ code }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Translation Form -->
+        <div class="form-container">
+            <div class="textarea-container">
+                <textarea id="source-text" placeholder="Text to translate:"></textarea>
+                <i class="stt-icon" onclick="startSpeechRecognition('source-text')">&#x1F3A4;</i>
             </div>
-
-            <div class="language-container">
-                <button type="submit" class="translate-btn">Translate</button>
+            <div>
+                &nbsp;
+            </div>           
+            <div class="textarea-container">
+                <textarea id="translated-text" placeholder="Translated text:" readonly></textarea>
+                <!-- Mic icon for TTS (Text to Speech) of translated text -->
+                <i class="stt-icon" onclick="textToSpeech(document.getElementById('translated-text').value)">🎤</i>
             </div>
-        </form>
+        </div>
 
-        <button id="tts-btn" class="tts-btn">Convert Text to Speech</button>
-
-        <audio id="tts-audio" controls style="display:none;">
-            <source id="audio-source" type="audio/mp3">
-        </audio>
+        <!-- Translate Button -->
+        <button class="translate-btn" onclick="translateText()">Translate</button>
     </div>
 
     <script>
-        // Swap source and target language
-        $('#swap-languages').click(function () {
-            // Get the selected language codes
-            var sourceLang = $('#source_language').val();
-            var targetLang = $('#target_language').val();
+        // Initialize SpeechRecognition API (if supported by the browser)
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US'; // You can change this dynamically
 
-            // Swap the values
-            $('#source_language').val(targetLang);
-            $('#target_language').val(sourceLang);
-        });
+        // Function to start Speech Recognition for STT
+        function startSpeechRecognition(textareaId) {
+            recognition.start();
+            recognition.onresult = function(event) {
+                const speechToText = event.results[0][0].transcript;
+                console.log("Recognized Text: " + speechToText);
+                
+                // Insert the recognized text into the corresponding textarea
+                document.getElementById(textareaId).value = speechToText;
 
-        // Other existing functionality
-        $('#stt-btn').click(function () {
-            $.ajax({
-                url: '/stt',
-                type: 'POST',
-                success: function (response) {
-                    if (response.text) {
-                        $('#stt-text').val(response.text);
-                    } else {
-                        alert('Error: ' + response.error);
-                    }
+                // Optionally, send the recognized text to Flask for translation
+                if (textareaId === "source-text") {
+                    translateText(speechToText);
                 }
-            });
-        });
+            };
 
-        $('#stt-translate-btn').click(function () {
-            $.ajax({
-                url: '/stt',
-                type: 'POST',
-                success: function (response) {
-                    if (response.text) {
-                        $('textarea[name="translated_text"]').val(response.text);
-                    } else {
-                        alert('Error: ' + response.error);
-                    }
-                }
-            });
-        });
+            recognition.onerror = function(event) {
+                console.log("Speech recognition error: " + event.error);
+            };
+        }
 
-        $('#tts-btn').click(function () {
-            var text = $('textarea[name="translated_text"]').val();
-            if (text) {
-                $.ajax({
-                    url: '/tts',
-                    type: 'POST',
-                    data: { text: text },
-                    success: function (response) {
-                        if (response.audio_url) {
-                            $('#audio-source').attr('src', response.audio_url);
-                            $('#tts-audio')[0].load();
-                            $('#tts-audio')[0].play();
-                        } else {
-                            alert('Error: ' + response.error);
-                        }
-                    }
-                });
-            } else {
-                alert('Please enter text for TTS.');
-            }
-        });
+        // Function to translate text and get result from Flask API
+        function translateText() {
+            const text = document.getElementById('source-text').value;
+            const targetLanguage = document.getElementById('target-language').value;
+
+            fetch('/translate', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'text': text,
+                    'target_language': targetLanguage
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const translatedText = data.translated_text;
+                document.getElementById('translated-text').value = translatedText;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // Function for Text-to-Speech (TTS)
+        function textToSpeech(text) {
+        fetch('/tts', {
+            method: 'POST',
+            body: new URLSearchParams({
+                'text': text
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const audioUrl = data.audio_url;
+            const audio = new Audio(audioUrl); // Create an Audio object with the correct URL
+            audio.play(); // Play the audio
+        })
+        .catch(error => console.error("Error:", error));
+       }
     </script>
 </body>
-
 </html>

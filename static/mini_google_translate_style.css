@@ -1,3 +1,4 @@
+/* General Body Styles */
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
@@ -6,22 +7,26 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f4f4f9;
+    background-color: lightblue;
 }
 
+/* Container for the whole page */
 .container {
     width: 100%;
     max-width: 800px;
     padding: 30px;
-    background-color: lightblue;
+    background-color: darkcyan;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
 }
 
+/* Header Style */
 h2 {
     text-align: center;
     margin-bottom: 20px;
 }
 
+/* Language Selection */
 .language-container {
     display: flex;
     justify-content: space-between;
@@ -33,12 +38,14 @@ h2 {
     width: 45%;
 }
 
+/* Form Container */
 .form-container {
     display: flex;
     flex-direction: row;
     gap: 15px;
 }
 
+/* Textarea Container for input and output */
 .textarea-container {
     position: relative;
     width: 50%;
@@ -52,8 +59,10 @@ textarea {
     border-radius: 5px;
     border: 1px solid #ccc;
     font-size: 16px;
+    position: relative;
 }
 
+/* Microphone Icon (STT) inside the textareas */
 .stt-icon {
     position: absolute;
     right: 10px;
@@ -62,6 +71,7 @@ textarea {
     cursor: pointer;
 }
 
+/* Arrow Style between input and output text areas */
 .arrows {
     text-align: center;
     margin: 10px 10px;
@@ -73,6 +83,7 @@ textarea {
     margin: 0 10px;
 }
 
+/* Translate Button */
 .translate-btn {
     padding: 12px 20px;
     background-color: #4CAF50;
@@ -88,6 +99,7 @@ textarea {
     background-color: #45a049;
 }
 
+/* TTS Button for translated text */
 .tts-btn {
     padding: 10px 20px;
     background-color: #1E88E5;
@@ -104,6 +116,3 @@ textarea {
 .tts-btn:hover {
     background-color: #1565c0;
 }
-
-
-
