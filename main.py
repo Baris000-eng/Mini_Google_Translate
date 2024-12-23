@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from googletrans import Translator
-from google_translate_constants import languages  # This is your custom language constants
+from google_translate_constants import languages  
 import speech_recognition as sr
 from gtts import gTTS
 import os
@@ -49,15 +49,14 @@ def tts():
     text = request.form.get('text')
     if text:
         # Generate speech using gTTS
-        tts = gTTS(text, lang='en')  # Change 'en' to dynamic language as needed
+        tts = gTTS(text, lang='en')  
         
         # Create a unique filename for the audio file
         audio_filename = f"audio_{tempfile.mkstemp()[1].split('/')[-1]}.mp3"
         
-        # Define the path where the file will be saved
         audio_filepath = os.path.join('static/audio', audio_filename)
         
-        # Save the TTS output to the file
+        # Save the TTS output to the file 
         tts.save(audio_filepath)
         
         # Return the URL to access the saved audio file
